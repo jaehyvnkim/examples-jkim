@@ -122,9 +122,15 @@ window.Quarto = {
   <li><a href="#predictor-non-worker-driver" id="toc-predictor-non-worker-driver" class="nav-link" data-scroll-target="#predictor-non-worker-driver">Predictor: Non-worker driver</a></li>
   <li><a href="#predictor-density" id="toc-predictor-density" class="nav-link" data-scroll-target="#predictor-density">Predictor: Density</a></li>
   </ul></li>
-  <li><a href="#prepare-data" id="toc-prepare-data" class="nav-link" data-scroll-target="#prepare-data">Prepare data</a>
+  <li><a href="#new-predictors-section" id="toc-new-predictors-section" class="nav-link" data-scroll-target="#new-predictors-section">New Predictors section</a>
   <ul class="collapse">
-  <li><a href="#drop-the-variables-you-wont-be-using" id="toc-drop-the-variables-you-wont-be-using" class="nav-link" data-scroll-target="#drop-the-variables-you-wont-be-using">Drop the variables you won’t be using</a></li>
+  <li><a href="#new-predictor-home-ownership" id="toc-new-predictor-home-ownership" class="nav-link" data-scroll-target="#new-predictor-home-ownership">New Predictor: Home Ownership</a></li>
+  <li><a href="#new-predictor-urbanrural-classification-urban-or-urbrur" id="toc-new-predictor-urbanrural-classification-urban-or-urbrur" class="nav-link" data-scroll-target="#new-predictor-urbanrural-classification-urban-or-urbrur">New Predictor: Urban/Rural Classification (URBAN or URBRUR)</a></li>
+  <li><a href="#new-predictor-educational-attainment-educ" id="toc-new-predictor-educational-attainment-educ" class="nav-link" data-scroll-target="#new-predictor-educational-attainment-educ">New Predictor: <strong>Educational Attainment (EDUC):</strong></a></li>
+  <li><a href="#preparing-data" id="toc-preparing-data" class="nav-link" data-scroll-target="#preparing-data">Preparing data</a>
+  <ul class="collapse">
+  <li><a href="#boston-regions-vehicle-availability-data" id="toc-boston-regions-vehicle-availability-data" class="nav-link" data-scroll-target="#boston-regions-vehicle-availability-data">Boston Region’s vehicle availability data</a></li>
+  <li><a href="#my-data-with-additional-predictors" id="toc-my-data-with-additional-predictors" class="nav-link" data-scroll-target="#my-data-with-additional-predictors">My Data with Additional Predictors</a></li>
   <li><a href="#create-training-and-test-datasets" id="toc-create-training-and-test-datasets" class="nav-link" data-scroll-target="#create-training-and-test-datasets">Create training and test datasets</a></li>
   <li><a href="#create-dfidx-data" id="toc-create-dfidx-data" class="nav-link" data-scroll-target="#create-dfidx-data">Create dfidx data</a></li>
   </ul></li>
@@ -135,6 +141,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#checking-model-reliability-and-accuracy" id="toc-checking-model-reliability-and-accuracy" class="nav-link" data-scroll-target="#checking-model-reliability-and-accuracy">Checking model reliability and accuracy</a></li>
   <li><a href="#your-challenge" id="toc-your-challenge" class="nav-link" data-scroll-target="#your-challenge">Your challenge:</a></li>
+  </ul></li>
   </ul>
 </nav>
 </div>
@@ -164,7 +171,7 @@ window.Quarto = {
 <p>The purpose of this assignment is for you to get some experience estimating and interpreting a discrete choice model by</p>
 <ul>
 <li><p>Reading the documentation for the vehicle availability submodel of the Boston Region Metropolitan Planning Organization’s regional travel demand model (<a href="https://www.ctps.org/travel-demand-model">TDM23</a>),</p></li>
-<li><p>Estimating a vehicle availability model using data using similar predictors to those in the TDM23 vehicle availability submodel and data from the 2017 National Household Travel Survey,</p></li>
+<li><p>Estimating vehicle availability model using data using similar predictors to those in the the TDM23 vehicle availability submodel and data from the 2017 National Household Travel Survey,</p></li>
 <li><p>Proposing an alternative vehicle availability model for the 2017 National Household Travel Survey,</p></li>
 <li><p>Comparing the accuracy and reliability of the two models,</p></li>
 <li><p>Interpreting the model results to explain the influence that household and built-environment characteristics have on vehicle availability.</p></li>
@@ -177,7 +184,8 @@ window.Quarto = {
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mlogit)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(caret)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(devtools)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>There are also a couple of functions that may be helpful in working with the <code>mlogit</code> package in the <code>mlogit_helpers.R</code> file in the GitHub repo. You can load those by sourcing the file.</p>
 <div class="cell">
@@ -309,7 +317,9 @@ window.Quarto = {
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>         NUMADLT,</span>
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>         HHFAMINC,</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>         HBPPOPDN,</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>         HOUSEID)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>         HOUSEID,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>         HOMEOWN,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>         URBAN)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We will need the person file to get the number of seniors in each household and to identify households in which all drivers are workers (the household file has the number of workers and the number of drivers, but does not necessarily tell us whether the workers and drivers are the same people).</p>
 <p>We will need to use the following variables from the person file:</p>
@@ -324,7 +334,8 @@ window.Quarto = {
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(HOUSEID,</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>         R_AGE,</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>         WORKER,</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>         DRIVER)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>         DRIVER,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>         EDUC)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="outcome-vehicle-availability" class="level3">
 <h3 class="anchored" data-anchor-id="outcome-vehicle-availability">Outcome: Vehicle availability</h3>
@@ -423,53 +434,145 @@ window.Quarto = {
 </div>
 </section>
 </section>
-<section id="prepare-data" class="level2">
-<h2 class="anchored" data-anchor-id="prepare-data">Prepare data</h2>
-<section id="drop-the-variables-you-wont-be-using" class="level3">
-<h3 class="anchored" data-anchor-id="drop-the-variables-you-wont-be-using">Drop the variables you won’t be using</h3>
-<p>We have some variables in our dataset that we used to construct the variables we needed, but we don’t need them any more. We’ll keep only the variable we’ll be including in our model.</p>
+<section id="new-predictors-section" class="level1">
+<h1>New Predictors section</h1>
+<section id="new-predictor-home-ownership" class="level3">
+<h3 class="anchored" data-anchor-id="new-predictor-home-ownership">New Predictor: Home Ownership</h3>
+<p>Homeowners and renters may face different transportation needs and constraints.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>hh_data <span class="ot">&lt;-</span> hh_data <span class="sc">|&gt;</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(HOUSEID,</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>         veh_avail,</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>         WRKCOUNT,</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>         n_child,</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>         n_seniors,</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>         n_extra_drivers,</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>         three_drivers,</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>         non_work_driver,</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>         income,</span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>         density)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>hh_data <span class="ot">&lt;-</span> hh_data <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">homeowner =</span> <span class="fu">case_when</span>(</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    HOMEOWN <span class="sc">==</span> <span class="st">"01"</span> <span class="sc">~</span> <span class="st">"Own"</span>,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    HOMEOWN <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"02"</span>, <span class="st">"97"</span>) <span class="sc">~</span> <span class="st">"Rent"</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span>   <span class="co"># For nonresponses (-7, -8) or other unexpected codes</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">homeowner =</span> <span class="fu">factor</span>(homeowner, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Own"</span>, <span class="st">"Rent"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="new-predictor-urbanrural-classification-urban-or-urbrur" class="level3">
+<h3 class="anchored" data-anchor-id="new-predictor-urbanrural-classification-urban-or-urbrur">New Predictor: Urban/Rural Classification (URBAN or URBRUR)</h3>
+<p>Even though we already have a density variable, a direct indicator of whether the household is in an urban or rural area may capture additional differences (for example, rural households are often more vehicle dependent than urban ones).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>hh_data <span class="ot">&lt;-</span> hh_data <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">urban_rural =</span> <span class="fu">case_when</span>(</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    URBAN <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"01"</span>, <span class="st">"02"</span>, <span class="st">"03"</span>) <span class="sc">~</span> <span class="st">"Urban"</span>,</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    URBAN <span class="sc">==</span> <span class="st">"04"</span> <span class="sc">~</span> <span class="st">"Rural"</span>,</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="cn">NA_character_</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  )) <span class="sc">%&gt;%</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">urban_rural =</span> <span class="fu">factor</span>(urban_rural, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Urban"</span>, <span class="st">"Rural"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="new-predictor-educational-attainment-educ" class="level3">
+<h3 class="anchored" data-anchor-id="new-predictor-educational-attainment-educ">New Predictor: <strong>Educational Attainment (EDUC):</strong></h3>
+<p>Education level can serve as a proxy for socioeconomic status and lifestyle.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>household_educ <span class="ot">&lt;-</span> person_data <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Keep only valid education responses.</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(EDUC <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"01"</span>, <span class="st">"02"</span>, <span class="st">"03"</span>, <span class="st">"04"</span>, <span class="st">"05"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(HOUSEID) <span class="sc">%&gt;%</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">educ_level =</span> <span class="fu">factor</span>(</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">max</span>(<span class="fu">as.numeric</span>(EDUC), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Less than HS"</span>,</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"HS/GED"</span>,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"Some college/Assoc."</span>,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"Bachelor's"</span>,</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>                 <span class="st">"Graduate/Professional"</span>)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span>  <span class="co"># This ungroup()s the data automatically.</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Join the recoded education variable</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>hh_data <span class="ot">&lt;-</span> hh_data <span class="sc">%&gt;%</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(household_educ, <span class="at">by =</span> <span class="st">"HOUSEID"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="preparing-data" class="level2">
+<h2 class="anchored" data-anchor-id="preparing-data">Preparing data</h2>
+<section id="boston-regions-vehicle-availability-data" class="level3">
+<h3 class="anchored" data-anchor-id="boston-regions-vehicle-availability-data">Boston Region’s vehicle availability data</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>hh_data_original <span class="ot">&lt;-</span> hh_data <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(HOUSEID,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>         veh_avail,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>         WRKCOUNT,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>         n_child,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>         n_seniors,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>         n_extra_drivers,</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>         three_drivers,</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>         non_work_driver,</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>         income,</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>         density)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="my-data-with-additional-predictors" class="level3">
+<h3 class="anchored" data-anchor-id="my-data-with-additional-predictors">My Data with Additional Predictors</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>hh_data <span class="ot">&lt;-</span> hh_data <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(HOUSEID,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>         veh_avail,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>         WRKCOUNT,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>         n_child,</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>         n_seniors,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>         n_extra_drivers,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>         three_drivers,</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>         non_work_driver,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>         income,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>         density,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>         homeowner,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>         urban_rural,</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>         educ_level)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="create-training-and-test-datasets" class="level3">
 <h3 class="anchored" data-anchor-id="create-training-and-test-datasets">Create training and test datasets</h3>
-<p>We will train the model on half of our sample and use the other half to test our model.</p>
+<p>We will train the model on half of our sample and use the other half to test both of our models.</p>
 <p>I’m setting a random number seed so that my randomly-selected variable will be the same every time. You can choose any number as your seed (I’m using my childhood phone number! It was a land line!). In your own work, you should use a different seed than I’m using here.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">3775668</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>hh_data_train_ids <span class="ot">&lt;-</span> <span class="fu">sample</span>(hh_data<span class="sc">$</span>HOUSEID, </span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">size =</span> <span class="fu">ceiling</span>(<span class="fu">nrow</span>(hh_data)<span class="sc">/</span><span class="dv">2</span>))</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>hh_data_train <span class="ot">&lt;-</span> hh_data <span class="sc">|&gt;</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(HOUSEID <span class="sc">%in%</span> hh_data_train_ids)</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>hh_data_test <span class="ot">&lt;-</span> hh_data <span class="sc">|&gt;</span></span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(HOUSEID <span class="sc">%!in%</span> hh_data_train_ids)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">9090</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Original Data</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>hh_data_train_ids_original <span class="ot">&lt;-</span> <span class="fu">sample</span>(hh_data_original<span class="sc">$</span>HOUSEID, </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>                        <span class="at">size =</span> <span class="fu">ceiling</span>(<span class="fu">nrow</span>(hh_data)<span class="sc">/</span><span class="dv">2</span>))</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>hh_data_train_original <span class="ot">&lt;-</span> hh_data_original <span class="sc">|&gt;</span></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(HOUSEID <span class="sc">%in%</span> hh_data_train_ids_original)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>hh_data_test_original <span class="ot">&lt;-</span> hh_data_original <span class="sc">|&gt;</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(HOUSEID <span class="sc">%!in%</span> hh_data_train_ids_original)</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a><span class="co">#New Data</span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>hh_data_train_ids <span class="ot">&lt;-</span> <span class="fu">sample</span>(hh_data<span class="sc">$</span>HOUSEID, </span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>                        <span class="at">size =</span> <span class="fu">ceiling</span>(<span class="fu">nrow</span>(hh_data)<span class="sc">/</span><span class="dv">2</span>))</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>hh_data_train <span class="ot">&lt;-</span> hh_data <span class="sc">|&gt;</span></span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(HOUSEID <span class="sc">%in%</span> hh_data_train_ids)</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>hh_data_test <span class="ot">&lt;-</span> hh_data <span class="sc">|&gt;</span></span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(HOUSEID <span class="sc">%!in%</span> hh_data_train_ids)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="create-dfidx-data" class="level3">
 <h3 class="anchored" data-anchor-id="create-dfidx-data">Create dfidx data</h3>
 <p>The mlogit package is useful for multinomial logistic regression, but it requires the data to be in a particular format (called dfidx) that includes information about which alternatives are available in each choice situation. In this case, all alternatives are available to all choosers in all choice situations and all variables describe the chooser and choice situation rather than the alternative, so you can use the function <code>fn_make_dfidx</code> in the <code>mlogit_helpers.R</code> file to reformat your data into the format that the <code>mlogit</code> package requires.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>veh_dfidx_train <span class="ot">&lt;-</span> <span class="fu">fn_make_dfidx</span>(hh_data_train,</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"HOUSEID"</span>,</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"veh_avail"</span>)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>veh_dfidx_test <span class="ot">&lt;-</span> <span class="fu">fn_make_dfidx</span>(hh_data_test,</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"HOUSEID"</span>,</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"veh_avail"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>veh_dfidx_train_original <span class="ot">&lt;-</span> <span class="fu">fn_make_dfidx</span>(hh_data_train_original,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"HOUSEID"</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"veh_avail"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>veh_dfidx_test_original <span class="ot">&lt;-</span> <span class="fu">fn_make_dfidx</span>(hh_data_test_original,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"HOUSEID"</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"veh_avail"</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>veh_dfidx_train <span class="ot">&lt;-</span> <span class="fu">fn_make_dfidx</span>(hh_data_train,</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"HOUSEID"</span>,</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"veh_avail"</span>)</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>veh_dfidx_test <span class="ot">&lt;-</span> <span class="fu">fn_make_dfidx</span>(hh_data_test,</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"HOUSEID"</span>,</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"veh_avail"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
@@ -477,68 +580,181 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="estimate-model">Estimate model</h2>
 <p>Now we can estimate our multinomial logistic regression using the <code>mlogit</code> function.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>model_veh <span class="ot">&lt;-</span> <span class="fu">mlogit</span>(choice <span class="sc">~</span> <span class="dv">0</span> <span class="sc">|</span> </span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                      WRKCOUNT <span class="sc">+</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                      n_child <span class="sc">+</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                      n_seniors <span class="sc">+</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                      n_extra_drivers <span class="sc">+</span></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>                      three_drivers <span class="sc">+</span> </span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>                      non_work_driver <span class="sc">+</span></span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>                      income <span class="sc">+</span></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>                      density <span class="sc">|</span> <span class="dv">0</span>,</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>                           veh_dfidx_train,</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>                           <span class="at">reflevel =</span> <span class="st">"Suff."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>model_veh_original <span class="ot">&lt;-</span> <span class="fu">mlogit</span>(choice <span class="sc">~</span> <span class="dv">0</span> <span class="sc">|</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>                      WRKCOUNT <span class="sc">+</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>                      n_child <span class="sc">+</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                      n_seniors <span class="sc">+</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                      n_extra_drivers <span class="sc">+</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>                      three_drivers <span class="sc">+</span> </span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>                      non_work_driver <span class="sc">+</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>                      income <span class="sc">+</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>                      density <span class="sc">|</span> <span class="dv">0</span>,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>                           veh_dfidx_train_original,</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>                           <span class="at">reflevel =</span> <span class="st">"Suff."</span>)</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>model_veh <span class="ot">&lt;-</span> <span class="fu">mlogit</span>(choice <span class="sc">~</span> <span class="dv">0</span> <span class="sc">|</span> </span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>                      WRKCOUNT <span class="sc">+</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>                      n_child <span class="sc">+</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>                      n_seniors <span class="sc">+</span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>                      n_extra_drivers <span class="sc">+</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>                      three_drivers <span class="sc">+</span> </span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>                      non_work_driver <span class="sc">+</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a>                      income <span class="sc">+</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>                      homeowner <span class="sc">+</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>                      urban_rural <span class="sc">+</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>                      educ_level <span class="sc">+</span>  </span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>                      density <span class="sc">|</span> <span class="dv">0</span>,</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>                           veh_dfidx_train,</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>                           <span class="at">reflevel =</span> <span class="st">"Suff."</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And now we can take a look at the results of our model.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_veh)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_veh_original)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
 Call:
 mlogit(formula = choice ~ 0 | WRKCOUNT + n_child + n_seniors + 
     n_extra_drivers + three_drivers + non_work_driver + income + 
-    density | 0, data = veh_dfidx_train, reflevel = "Suff.", 
+    density | 0, data = veh_dfidx_train_original, reflevel = "Suff.", 
     method = "nr")
 
 Frequencies of alternatives:choice
    Suff.  Insuff.     Zero 
-0.884649 0.068536 0.046814 
+0.884809 0.068409 0.046782 
 
 nr method
-9 iterations, 0h:0m:8s 
-g'(-H)^-1g = 8.34E-05 
+9 iterations, 0h:0m:4s 
+g'(-H)^-1g = 0.000125 
 successive function values within tolerance limits 
 
 Coefficients :
                            Estimate Std. Error  z-value  Pr(&gt;|z|)    
-(Intercept):Insuff.       -4.251500   0.071869 -59.1565 &lt; 2.2e-16 ***
-(Intercept):Zero           0.197101   0.088949   2.2159  0.026699 *  
-WRKCOUNT:Insuff.           0.414381   0.031556  13.1316 &lt; 2.2e-16 ***
-WRKCOUNT:Zero             -3.181995   0.068991 -46.1218 &lt; 2.2e-16 ***
-n_child:Insuff.            0.201859   0.018019  11.2026 &lt; 2.2e-16 ***
-n_child:Zero              -0.119276   0.042279  -2.8212  0.004785 ** 
-n_seniors:Insuff.          0.324414   0.024246  13.3802 &lt; 2.2e-16 ***
-n_seniors:Zero            -0.546331   0.048072 -11.3649 &lt; 2.2e-16 ***
-n_extra_drivers:Insuff.    0.257564   0.059582   4.3229  1.54e-05 ***
-n_extra_drivers:Zero       0.420559   0.432279   0.9729  0.330609    
-three_driversTRUE:Insuff.  0.742189   0.084595   8.7734 &lt; 2.2e-16 ***
-three_driversTRUE:Zero     0.602056   0.577225   1.0430  0.296940    
-non_work_driver:Insuff.    1.220285   0.054960  22.2030 &lt; 2.2e-16 ***
-non_work_driver:Zero      -4.133704   0.073608 -56.1581 &lt; 2.2e-16 ***
-incomelow:Insuff.          0.597000   0.037440  15.9453 &lt; 2.2e-16 ***
-incomelow:Zero             1.989625   0.057955  34.3302 &lt; 2.2e-16 ***
-incomehigh:Insuff.        -0.300225   0.049837  -6.0242  1.70e-09 ***
-incomehigh:Zero            0.086375   0.122365   0.7059  0.480261    
-densityLow:Insuff.        -0.333071   0.039392  -8.4553 &lt; 2.2e-16 ***
-densityLow:Zero           -0.604069   0.059383 -10.1724 &lt; 2.2e-16 ***
-densityMedium:Insuff.      0.780560   0.060495  12.9030 &lt; 2.2e-16 ***
-densityMedium:Zero         1.500555   0.070757  21.2072 &lt; 2.2e-16 ***
+(Intercept):Insuff.       -4.239093   0.071697 -59.1254 &lt; 2.2e-16 ***
+(Intercept):Zero           0.252009   0.090189   2.7942  0.005202 ** 
+WRKCOUNT:Insuff.           0.441627   0.031624  13.9648 &lt; 2.2e-16 ***
+WRKCOUNT:Zero             -3.305653   0.070071 -47.1760 &lt; 2.2e-16 ***
+n_child:Insuff.            0.189686   0.018371  10.3253 &lt; 2.2e-16 ***
+n_child:Zero              -0.113463   0.042489  -2.6704  0.007576 ** 
+n_seniors:Insuff.          0.340504   0.024309  14.0073 &lt; 2.2e-16 ***
+n_seniors:Zero            -0.552431   0.048671 -11.3503 &lt; 2.2e-16 ***
+n_extra_drivers:Insuff.    0.095702   0.058558   1.6343  0.102196    
+n_extra_drivers:Zero       1.082343   0.468989   2.3078  0.021009 *  
+three_driversTRUE:Insuff.  0.942423   0.082673  11.3994 &lt; 2.2e-16 ***
+three_driversTRUE:Zero     0.059051   0.626275   0.0943  0.924879    
+non_work_driver:Insuff.    1.180274   0.054929  21.4872 &lt; 2.2e-16 ***
+non_work_driver:Zero      -4.270025   0.074294 -57.4743 &lt; 2.2e-16 ***
+incomelow:Insuff.          0.627339   0.037401  16.7734 &lt; 2.2e-16 ***
+incomelow:Zero             1.898155   0.057938  32.7619 &lt; 2.2e-16 ***
+incomehigh:Insuff.        -0.332482   0.050123  -6.6333 3.283e-11 ***
+incomehigh:Zero            0.023094   0.124605   0.1853  0.852967    
+densityLow:Insuff.        -0.372676   0.039122  -9.5259 &lt; 2.2e-16 ***
+densityLow:Zero           -0.419905   0.061344  -6.8451 7.644e-12 ***
+densityMedium:Insuff.      0.786591   0.059345  13.2546 &lt; 2.2e-16 ***
+densityMedium:Zero         1.529073   0.073324  20.8538 &lt; 2.2e-16 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Log-Likelihood: -19848
-McFadden R^2:  0.272 
-Likelihood ratio test : chisq = 14831 (p.value = &lt; 2.22e-16)</code></pre>
+Log-Likelihood: -19742
+McFadden R^2:  0.27517 
+Likelihood ratio test : chisq = 14989 (p.value = &lt; 2.22e-16)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_veh)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+mlogit(formula = choice ~ 0 | WRKCOUNT + n_child + n_seniors + 
+    n_extra_drivers + three_drivers + non_work_driver + income + 
+    homeowner + urban_rural + educ_level + density | 0, data = veh_dfidx_train, 
+    reflevel = "Suff.", method = "nr")
+
+Frequencies of alternatives:choice
+   Suff.  Insuff.     Zero 
+0.883809 0.068440 0.047751 
+
+nr method
+9 iterations, 0h:0m:7s 
+g'(-H)^-1g = 7.71E-05 
+successive function values within tolerance limits 
+
+Coefficients :
+                                         Estimate Std. Error  z-value  Pr(&gt;|z|)
+(Intercept):Insuff.                     -5.241432   0.175714 -29.8293 &lt; 2.2e-16
+(Intercept):Zero                         0.067541   0.140155   0.4819 0.6298740
+WRKCOUNT:Insuff.                         0.485188   0.031905  15.2073 &lt; 2.2e-16
+WRKCOUNT:Zero                           -2.985333   0.071071 -42.0048 &lt; 2.2e-16
+n_child:Insuff.                          0.196295   0.018201  10.7849 &lt; 2.2e-16
+n_child:Zero                            -0.221118   0.045942  -4.8129 1.487e-06
+n_seniors:Insuff.                        0.406838   0.025467  15.9748 &lt; 2.2e-16
+n_seniors:Zero                          -0.263199   0.051314  -5.1292 2.910e-07
+n_extra_drivers:Insuff.                  0.191955   0.059989   3.1998 0.0013752
+n_extra_drivers:Zero                     0.676586   0.436062   1.5516 0.1207618
+three_driversTRUE:Insuff.                0.851053   0.085813   9.9175 &lt; 2.2e-16
+three_driversTRUE:Zero                   0.750428   0.583193   1.2868 0.1981788
+non_work_driver:Insuff.                  1.320563   0.055005  24.0079 &lt; 2.2e-16
+non_work_driver:Zero                    -3.944103   0.076494 -51.5613 &lt; 2.2e-16
+incomelow:Insuff.                        0.506676   0.041414  12.2345 &lt; 2.2e-16
+incomelow:Zero                           1.506256   0.062878  23.9554 &lt; 2.2e-16
+incomehigh:Insuff.                      -0.297598   0.051548  -5.7732 7.777e-09
+incomehigh:Zero                          0.359590   0.126078   2.8521 0.0043428
+homeownerRent:Insuff.                    0.897634   0.041049  21.8676 &lt; 2.2e-16
+homeownerRent:Zero                       1.478147   0.060402  24.4718 &lt; 2.2e-16
+urban_ruralRural:Insuff.                -0.323626   0.047258  -6.8481 7.483e-12
+urban_ruralRural:Zero                   -0.398615   0.088640  -4.4970 6.891e-06
+educ_levelHS/GED:Insuff.                 0.406188   0.164423   2.4704 0.0134969
+educ_levelHS/GED:Zero                   -0.573693   0.108009  -5.3115 1.087e-07
+educ_levelSome college/Assoc.:Insuff.    0.470402   0.161512   2.9125 0.0035855
+educ_levelSome college/Assoc.:Zero      -0.946809   0.107561  -8.8026 &lt; 2.2e-16
+educ_levelBachelor's:Insuff.             0.394846   0.163619   2.4132 0.0158132
+educ_levelBachelor's:Zero               -1.204158   0.118630 -10.1505 &lt; 2.2e-16
+educ_levelGraduate/Professional:Insuff.  0.748067   0.163270   4.5818 4.610e-06
+educ_levelGraduate/Professional:Zero    -0.961321   0.121436  -7.9163 2.442e-15
+densityLow:Insuff.                      -0.135839   0.041685  -3.2587 0.0011194
+densityLow:Zero                         -0.238256   0.065069  -3.6616 0.0002507
+densityMedium:Insuff.                    0.637597   0.060991  10.4539 &lt; 2.2e-16
+densityMedium:Zero                       1.424430   0.073550  19.3669 &lt; 2.2e-16
+                                           
+(Intercept):Insuff.                     ***
+(Intercept):Zero                           
+WRKCOUNT:Insuff.                        ***
+WRKCOUNT:Zero                           ***
+n_child:Insuff.                         ***
+n_child:Zero                            ***
+n_seniors:Insuff.                       ***
+n_seniors:Zero                          ***
+n_extra_drivers:Insuff.                 ** 
+n_extra_drivers:Zero                       
+three_driversTRUE:Insuff.               ***
+three_driversTRUE:Zero                     
+non_work_driver:Insuff.                 ***
+non_work_driver:Zero                    ***
+incomelow:Insuff.                       ***
+incomelow:Zero                          ***
+incomehigh:Insuff.                      ***
+incomehigh:Zero                         ** 
+homeownerRent:Insuff.                   ***
+homeownerRent:Zero                      ***
+urban_ruralRural:Insuff.                ***
+urban_ruralRural:Zero                   ***
+educ_levelHS/GED:Insuff.                *  
+educ_levelHS/GED:Zero                   ***
+educ_levelSome college/Assoc.:Insuff.   ** 
+educ_levelSome college/Assoc.:Zero      ***
+educ_levelBachelor's:Insuff.            *  
+educ_levelBachelor's:Zero               ***
+educ_levelGraduate/Professional:Insuff. ***
+educ_levelGraduate/Professional:Zero    ***
+densityLow:Insuff.                      ** 
+densityLow:Zero                         ***
+densityMedium:Insuff.                   ***
+densityMedium:Zero                      ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Log-Likelihood: -19120
+McFadden R^2:  0.30254 
+Likelihood ratio test : chisq = 16588 (p.value = &lt; 2.22e-16)</code></pre>
 </div>
 </div>
 </section>
@@ -579,32 +795,42 @@ Likelihood ratio test : chisq = 14831 (p.value = &lt; 2.22e-16)</code></pre>
 \]</span></p>
 <p>We can do this calculation for all the households in our test dataset using the <code>predict()</code> function.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>predicts_test <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_veh, veh_dfidx_test) <span class="sc">|&gt;</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"HOUSEID"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">HOUSEID =</span> <span class="fu">as.numeric</span>(HOUSEID)) <span class="sc">|&gt;</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(hh_data_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>predicts_test_original <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_veh_original, veh_dfidx_test_original) <span class="sc">|&gt;</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"HOUSEID"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">HOUSEID =</span> <span class="fu">as.numeric</span>(HOUSEID)) <span class="sc">|&gt;</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(hh_data_test)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>predicts_test <span class="ot">&lt;-</span> <span class="fu">predict</span>(model_veh, veh_dfidx_test) <span class="sc">|&gt;</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="st">"HOUSEID"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">HOUSEID =</span> <span class="fu">as.numeric</span>(HOUSEID)) <span class="sc">|&gt;</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(hh_data_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And here are the first few rows of the resulting data frame, which shows the predicted probabilities from the model as well as the values for the predictors and the observed outcome.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(predicts_test) <span class="sc">|&gt;</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(predicts_test) <span class="sc">|&gt;</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
+<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 5%">
 <col style="width: 6%">
-<col style="width: 7%">
-<col style="width: 7%">
-<col style="width: 7%">
-<col style="width: 7%">
-<col style="width: 6%">
-<col style="width: 5%">
-<col style="width: 7%">
-<col style="width: 11%">
-<col style="width: 10%">
-<col style="width: 11%">
-<col style="width: 5%">
-<col style="width: 5%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -621,29 +847,35 @@ Likelihood ratio test : chisq = 14831 (p.value = &lt; 2.22e-16)</code></pre>
 <th style="text-align: right;">non_work_driver</th>
 <th style="text-align: left;">income</th>
 <th style="text-align: left;">density</th>
+<th style="text-align: left;">homeowner</th>
+<th style="text-align: left;">urban_rural</th>
+<th style="text-align: left;">educ_level</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">30000008</td>
-<td style="text-align: right;">0.9760591</td>
-<td style="text-align: right;">0.0228218</td>
-<td style="text-align: right;">0.0011191</td>
+<td style="text-align: right;">30000012</td>
+<td style="text-align: right;">0.8706390</td>
+<td style="text-align: right;">0.0222213</td>
+<td style="text-align: right;">0.1071398</td>
 <td style="text-align: left;">Suff.</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">FALSE</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: left;">medium</td>
-<td style="text-align: left;">Low</td>
+<td style="text-align: left;">high</td>
+<td style="text-align: left;">Medium</td>
+<td style="text-align: left;">Own</td>
+<td style="text-align: left;">Urban</td>
+<td style="text-align: left;">Graduate/Professional</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">30000019</td>
-<td style="text-align: right;">0.8723171</td>
-<td style="text-align: right;">0.1048672</td>
-<td style="text-align: right;">0.0228156</td>
+<td style="text-align: right;">0.8914325</td>
+<td style="text-align: right;">0.0867180</td>
+<td style="text-align: right;">0.0218495</td>
 <td style="text-align: left;">Suff.</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
@@ -653,12 +885,15 @@ Likelihood ratio test : chisq = 14831 (p.value = &lt; 2.22e-16)</code></pre>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">low</td>
 <td style="text-align: left;">Low</td>
+<td style="text-align: left;">Own</td>
+<td style="text-align: left;">Urban</td>
+<td style="text-align: left;">HS/GED</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">30000041</td>
-<td style="text-align: right;">0.9817709</td>
-<td style="text-align: right;">0.0170019</td>
-<td style="text-align: right;">0.0012272</td>
+<td style="text-align: right;">0.9800939</td>
+<td style="text-align: right;">0.0187506</td>
+<td style="text-align: right;">0.0011555</td>
 <td style="text-align: left;">Suff.</td>
 <td style="text-align: right;">2</td>
 <td style="text-align: right;">0</td>
@@ -668,51 +903,63 @@ Likelihood ratio test : chisq = 14831 (p.value = &lt; 2.22e-16)</code></pre>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">high</td>
 <td style="text-align: left;">Low</td>
+<td style="text-align: left;">Own</td>
+<td style="text-align: left;">Urban</td>
+<td style="text-align: left;">Graduate/Professional</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">30000089</td>
-<td style="text-align: right;">0.9653308</td>
-<td style="text-align: right;">0.0337973</td>
-<td style="text-align: right;">0.0008719</td>
+<td style="text-align: right;">30000062</td>
+<td style="text-align: right;">0.9778461</td>
+<td style="text-align: right;">0.0219212</td>
+<td style="text-align: right;">0.0002327</td>
 <td style="text-align: left;">Suff.</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">medium</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">high</td>
 <td style="text-align: left;">Low</td>
+<td style="text-align: left;">Own</td>
+<td style="text-align: left;">Rural</td>
+<td style="text-align: left;">Bachelor’s</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">30000094</td>
-<td style="text-align: right;">0.9587027</td>
-<td style="text-align: right;">0.0148113</td>
-<td style="text-align: right;">0.0264860</td>
+<td style="text-align: right;">30000082</td>
+<td style="text-align: right;">0.9124670</td>
+<td style="text-align: right;">0.0854174</td>
+<td style="text-align: right;">0.0021156</td>
 <td style="text-align: left;">Suff.</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">FALSE</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">medium</td>
 <td style="text-align: left;">Low</td>
+<td style="text-align: left;">Rent</td>
+<td style="text-align: left;">Urban</td>
+<td style="text-align: left;">Graduate/Professional</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">30000107</td>
-<td style="text-align: right;">0.9365301</td>
-<td style="text-align: right;">0.0451941</td>
-<td style="text-align: right;">0.0182758</td>
-<td style="text-align: left;">Suff.</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: right;">30000130</td>
+<td style="text-align: right;">0.9432429</td>
+<td style="text-align: right;">0.0526640</td>
+<td style="text-align: right;">0.0040931</td>
+<td style="text-align: left;">Insuff.</td>
+<td style="text-align: right;">2</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: left;">medium</td>
-<td style="text-align: left;">High</td>
+<td style="text-align: left;">Medium</td>
+<td style="text-align: left;">Own</td>
+<td style="text-align: left;">Urban</td>
+<td style="text-align: left;">Graduate/Professional</td>
 </tr>
 </tbody>
 </table>
@@ -724,55 +971,106 @@ Likelihood ratio test : chisq = 14831 (p.value = &lt; 2.22e-16)</code></pre>
 <h2 class="anchored" data-anchor-id="checking-model-reliability-and-accuracy">Checking model reliability and accuracy</h2>
 <p>Now we can check how accurate and reliable our model is on the test dataset. First, I’ll designate the alternative with the highest predicted probability as the “most likely” choice.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>predicts_test <span class="ot">&lt;-</span> predicts_test <span class="sc">|&gt;</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">most_likely =</span> <span class="fu">case_when</span>((Suff. <span class="sc">&gt;</span> Insuff.) <span class="sc">&amp;</span> (Suff. <span class="sc">&gt;</span> Zero) <span class="sc">~</span> <span class="st">"Suff."</span>,</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>                                 (Zero <span class="sc">&gt;</span> Insuff.) <span class="sc">&amp;</span> (Zero <span class="sc">&gt;</span> Suff.) <span class="sc">~</span> <span class="st">"Zero"</span>,</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Insuff."</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>predicts_test_original <span class="ot">&lt;-</span> predicts_test_original <span class="sc">|&gt;</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">most_likely =</span> <span class="fu">case_when</span>((Suff. <span class="sc">&gt;</span> Insuff.) <span class="sc">&amp;</span> (Suff. <span class="sc">&gt;</span> Zero) <span class="sc">~</span> <span class="st">"Suff."</span>,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                                 (Zero <span class="sc">&gt;</span> Insuff.) <span class="sc">&amp;</span> (Zero <span class="sc">&gt;</span> Suff.) <span class="sc">~</span> <span class="st">"Zero"</span>,</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Insuff."</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>predicts_test <span class="ot">&lt;-</span> predicts_test <span class="sc">|&gt;</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">most_likely =</span> <span class="fu">case_when</span>((Suff. <span class="sc">&gt;</span> Insuff.) <span class="sc">&amp;</span> (Suff. <span class="sc">&gt;</span> Zero) <span class="sc">~</span> <span class="st">"Suff."</span>,</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>                                 (Zero <span class="sc">&gt;</span> Insuff.) <span class="sc">&amp;</span> (Zero <span class="sc">&gt;</span> Suff.) <span class="sc">~</span> <span class="st">"Zero"</span>,</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>                                 <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"Insuff."</span>)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now, I need to convert the <code>most_likely</code> and <code>veh_avail</code> variables from strings to factors in order for the next part to work.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>predicts_test <span class="ot">&lt;-</span> predicts_test <span class="sc">|&gt;</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">most_likely =</span> <span class="fu">factor</span>(most_likely, </span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Suff."</span>, <span class="st">"Insuff."</span>, <span class="st">"Zero"</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">veh_avail =</span> <span class="fu">factor</span>(veh_avail,</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Suff."</span>, <span class="st">"Insuff."</span>, <span class="st">"Zero"</span>))) <span class="sc">|&gt;</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">correct =</span> veh_avail <span class="sc">==</span> most_likely)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>predicts_test_original <span class="ot">&lt;-</span> predicts_test_original <span class="sc">|&gt;</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">most_likely =</span> <span class="fu">factor</span>(most_likely, </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>                              <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Suff."</span>, <span class="st">"Insuff."</span>, <span class="st">"Zero"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">veh_avail =</span> <span class="fu">factor</span>(veh_avail,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Suff."</span>, <span class="st">"Insuff."</span>, <span class="st">"Zero"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">correct =</span> veh_avail <span class="sc">==</span> most_likely)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>predicts_test <span class="ot">&lt;-</span> predicts_test <span class="sc">|&gt;</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">most_likely =</span> <span class="fu">factor</span>(most_likely, </span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>                              <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Suff."</span>, <span class="st">"Insuff."</span>, <span class="st">"Zero"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">veh_avail =</span> <span class="fu">factor</span>(veh_avail,</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>                            <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Suff."</span>, <span class="st">"Insuff."</span>, <span class="st">"Zero"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">correct =</span> veh_avail <span class="sc">==</span> most_likely)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>And now, I can use the <code>confusionMatrix</code> function to generate some accuracy and reliability statistics.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="at">data =</span> predicts_test<span class="sc">$</span>most_likely,</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">reference =</span> predicts_test<span class="sc">$</span>veh_avail)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="at">data =</span> predicts_test_original<span class="sc">$</span>most_likely,</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">reference =</span> predicts_test_original<span class="sc">$</span>veh_avail)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Confusion Matrix and Statistics
 
           Reference
 Prediction Suff. Insuff.  Zero
-   Suff.   54778    4229  1469
-   Insuff.   164     141     1
-   Zero      316       1  1509
+   Suff.   27441    2183   759
+   Insuff.    74      58     1
+   Zero      150       1   704
 
 Overall Statistics
                                           
-               Accuracy : 0.9013          
-                 95% CI : (0.8989, 0.9036)
-    No Information Rate : 0.8826          
+               Accuracy : 0.899           
+                 95% CI : (0.8956, 0.9023)
+    No Information Rate : 0.8819          
     P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
                                           
-                  Kappa : 0.3226          
+                  Kappa : 0.3003          
                                           
  Mcnemar's Test P-Value : &lt; 2.2e-16       
 
 Statistics by Class:
 
                      Class: Suff. Class: Insuff. Class: Zero
-Sensitivity                0.9913       0.032258     0.50655
-Specificity                0.2248       0.997167     0.99468
-Pos Pred Value             0.9058       0.460784     0.82640
-Neg Pred Value             0.7749       0.932105     0.97582
-Prevalence                 0.8826       0.069815     0.04758
-Detection Rate             0.8749       0.002252     0.02410
-Detection Prevalence       0.9659       0.004888     0.02917
-Balanced Accuracy          0.6080       0.514712     0.75061</code></pre>
+Sensitivity                0.9919       0.025870     0.48087
+Specificity                0.2062       0.997425     0.99495
+Pos Pred Value             0.9032       0.436090     0.82339
+Neg Pred Value             0.7733       0.930085     0.97510
+Prevalence                 0.8819       0.071467     0.04667
+Detection Rate             0.8747       0.001849     0.02244
+Detection Prevalence       0.9685       0.004240     0.02725
+Balanced Accuracy          0.5990       0.511648     0.73791</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">confusionMatrix</span>(<span class="at">data =</span> predicts_test<span class="sc">$</span>most_likely,</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>                <span class="at">reference =</span> predicts_test<span class="sc">$</span>veh_avail)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Confusion Matrix and Statistics
+
+          Reference
+Prediction Suff. Insuff.  Zero
+   Suff.   54796    4198  1433
+   Insuff.   218     176     4
+   Zero      283       3  1477
+
+Overall Statistics
+                                          
+               Accuracy : 0.9019          
+                 95% CI : (0.8996, 0.9042)
+    No Information Rate : 0.8835          
+    P-Value [Acc &gt; NIR] : &lt; 2.2e-16       
+                                          
+                  Kappa : 0.3247          
+                                          
+ Mcnemar's Test P-Value : &lt; 2.2e-16       
+
+Statistics by Class:
+
+                     Class: Suff. Class: Insuff. Class: Zero
+Sensitivity                0.9909       0.040210     0.50686
+Specificity                0.2277       0.996186     0.99521
+Pos Pred Value             0.9068       0.442211     0.83778
+Neg Pred Value             0.7682       0.932449     0.97637
+Prevalence                 0.8835       0.069934     0.04656
+Detection Rate             0.8755       0.002812     0.02360
+Detection Prevalence       0.9655       0.006359     0.02817
+Balanced Accuracy          0.6093       0.518198     0.75104</code></pre>
 </div>
 </div>
 <p>Interpreting the overall statistics (see the documentation for the ConfusionMatrix function here: <a href="https://cran.r-project.org/web/packages/caret/caret.pdf" class="uri">https://cran.r-project.org/web/packages/caret/caret.pdf</a>):</p>
@@ -799,6 +1097,7 @@ Balanced Accuracy          0.6080       0.514712     0.75061</code></pre>
 <p>Can you estimate a vehicle availability model that performs better than this one? You might try a different set of predictor variables and/or a different form of the ones in this model (for example, you could use a continuous density variable, or more density categories).</p>
 <p>Post your analysis code to GitHub and write a memo summarizing your work. Submit the memo via Canvas.</p>
 <p>The memo should clearly document and explain all of your analysis decisions and interpreting the results of the preferred model to explain the influence that household and/or built-environment characteristics have on vehicle availability.</p>
+</section>
 </section>
 
 </main>

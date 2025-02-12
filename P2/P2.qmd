@@ -338,7 +338,7 @@ hh_data <- hh_data |>
 
 ### New Predictor: Home Ownership
 
-Homeowners and renters may face different transportation needs and constraints. Homeownership is often associated with longer residence and investment in auto ownership, whereas renters (especially in urban areas) may opt to rely on alternative transportation.
+Homeowners and renters may face different transportation needs and constraints.
 
 ```{r}
 hh_data <- hh_data %>%
@@ -366,7 +366,7 @@ hh_data <- hh_data %>%
 
 ### New Predictor: **Educational Attainment (EDUC):**
 
-Education level can serve as a proxy for socioeconomic status and lifestyle. Households with higher education levels might have different travel preferences (for example, a greater willingness to use alternative modes or oppoosite) compared to those with lower education levels.
+Education level can serve as a proxy for socioeconomic status and lifestyle.
 
 ```{r}
 household_educ <- person_data %>%
@@ -432,7 +432,7 @@ hh_data <- hh_data |>
 
 ### Create training and test datasets
 
-We will train the model on half of our sample and use the other half to test our model.
+We will train the model on half of our sample and use the other half to test both of our models.
 
 I'm setting a random number seed so that my randomly-selected variable will be the same every time. You can choose any number as your seed (I'm using my childhood phone number! It was a land line!). In your own work, you should use a different seed than I'm using here.
 
