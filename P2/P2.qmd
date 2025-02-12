@@ -12,7 +12,7 @@ The purpose of this assignment is for you to get some experience estimating and 
 
 -   Reading the documentation for the vehicle availability submodel of the Boston Region Metropolitan Planning Organization's regional travel demand model ([TDM23](https://www.ctps.org/travel-demand-model)),
 
--   Estimating a vehicle availability model using data using similar predictors to those in the TDM23 vehicle availability submodel and data from the 2017 National Household Travel Survey,
+-   Estimating vehicle availability model using data using similar predictors to those in the the TDM23 vehicle availability submodel and data from the 2017 National Household Travel Survey,
 
 -   Proposing an alternative vehicle availability model for the 2017 National Household Travel Survey,
 
@@ -30,6 +30,7 @@ library(here)
 library(mlogit)
 library(knitr)
 library(caret)
+library(devtools)
 ```
 
 There are also a couple of functions that may be helpful in working with the `mlogit` package in the `mlogit_helpers.R` file in the GitHub repo. You can load those by sourcing the file.
@@ -203,7 +204,10 @@ hh_data <- hh_data |>
          NUMADLT,
          HHFAMINC,
          HBPPOPDN,
-         HOUSEID)
+         HOUSEID,
+         HOMEOWN,
+         URBAN)
+
 ```
 
 We will need the person file to get the number of seniors in each household and to identify households in which all drivers are workers (the household file has the number of workers and the number of drivers, but does not necessarily tell us whether the workers and drivers are the same people).
@@ -223,7 +227,8 @@ person_data <- person_data |>
   select(HOUSEID,
          R_AGE,
          WORKER,
-         DRIVER)
+         DRIVER,
+         EDUC)
 ```
 
 ### Outcome: Vehicle availability
@@ -329,14 +334,69 @@ hh_data <- hh_data |>
                              TRUE ~ "Medium"))
 ```
 
-## Prepare data
+# New Predictors section
 
-### Drop the variables you won't be using
+### New Predictor: Home Ownership
 
-We have some variables in our dataset that we used to construct the variables we needed, but we don't need them any more. We'll keep only the variable we'll be including in our model.
+Homeowners and renters may face different transportation needs and constraints. Homeownership is often associated with longer residence and investment in auto ownership, whereas renters (especially in urban areas) may opt to rely on alternative transportation.
 
 ```{r}
-hh_data <- hh_data |>
+hh_data <- hh_data %>%
+  mutate(homeowner = case_when(
+    HOMEOWN == "01" ~ "Own",
+    HOMEOWN %in% c("02", "97") ~ "Rent",
+    TRUE ~ NA_character_   # For nonresponses (-7, -8) or other unexpected codes
+  )) %>%
+  mutate(homeowner = factor(homeowner, levels = c("Own", "Rent")))
+```
+
+### New Predictor: Urban/Rural Classification (URBAN or URBRUR)
+
+Even though we already have a density variable, a direct indicator of whether the household is in an urban or rural area may capture additional differences (for example, rural households are often more vehicle dependent than urban ones).
+
+```{r}
+hh_data <- hh_data %>%
+  mutate(urban_rural = case_when(
+    URBAN %in% c("01", "02", "03") ~ "Urban",
+    URBAN == "04" ~ "Rural",
+    TRUE ~ NA_character_
+  )) %>%
+  mutate(urban_rural = factor(urban_rural, levels = c("Urban", "Rural")))
+```
+
+### New Predictor: **Educational Attainment (EDUC):**
+
+Education level can serve as a proxy for socioeconomic status and lifestyle. Households with higher education levels might have different travel preferences (for example, a greater willingness to use alternative modes or oppoosite) compared to those with lower education levels.
+
+```{r}
+household_educ <- person_data %>%
+  # Keep only valid education responses.
+  filter(EDUC %in% c("01", "02", "03", "04", "05")) %>%
+  group_by(HOUSEID) %>%
+  summarise(
+    educ_level = factor(
+      max(as.numeric(EDUC), na.rm = TRUE),
+      levels = 1:5,
+      labels = c("Less than HS",
+                 "HS/GED",
+                 "Some college/Assoc.",
+                 "Bachelor's",
+                 "Graduate/Professional")
+    ),
+    .groups = "drop"  # This ungroup()s the data automatically.
+  )
+
+# Join the recoded education variable
+hh_data <- hh_data %>%
+  left_join(household_educ, by = "HOUSEID")
+```
+
+## Preparing data
+
+### Boston Region's vehicle availability data
+
+```{r}
+hh_data_original <- hh_data |>
   select(HOUSEID,
          veh_avail,
          WRKCOUNT,
@@ -350,6 +410,26 @@ hh_data <- hh_data |>
 
 ```
 
+### My Data with Additional Predictors
+
+```{r}
+hh_data <- hh_data |>
+  select(HOUSEID,
+         veh_avail,
+         WRKCOUNT,
+         n_child,
+         n_seniors,
+         n_extra_drivers,
+         three_drivers,
+         non_work_driver,
+         income,
+         density,
+         homeowner,
+         urban_rural,
+         educ_level)
+
+```
+
 ### Create training and test datasets
 
 We will train the model on half of our sample and use the other half to test our model.
@@ -357,8 +437,20 @@ We will train the model on half of our sample and use the other half to test our
 I'm setting a random number seed so that my randomly-selected variable will be the same every time. You can choose any number as your seed (I'm using my childhood phone number! It was a land line!). In your own work, you should use a different seed than I'm using here.
 
 ```{r}
-set.seed(3775668)
+set.seed(9090)
 
+#Original Data
+hh_data_train_ids_original <- sample(hh_data_original$HOUSEID, 
+                        size = ceiling(nrow(hh_data)/2))
+
+hh_data_train_original <- hh_data_original |>
+  filter(HOUSEID %in% hh_data_train_ids_original)
+
+hh_data_test_original <- hh_data_original |>
+  filter(HOUSEID %!in% hh_data_train_ids_original)
+
+
+#New Data
 hh_data_train_ids <- sample(hh_data$HOUSEID, 
                         size = ceiling(nrow(hh_data)/2))
 
@@ -374,6 +466,13 @@ hh_data_test <- hh_data |>
 The mlogit package is useful for multinomial logistic regression, but it requires the data to be in a particular format (called dfidx) that includes information about which alternatives are available in each choice situation. In this case, all alternatives are available to all choosers in all choice situations and all variables describe the chooser and choice situation rather than the alternative, so you can use the function `fn_make_dfidx` in the `mlogit_helpers.R` file to reformat your data into the format that the `mlogit` package requires.
 
 ```{r}
+veh_dfidx_train_original <- fn_make_dfidx(hh_data_train_original,
+                                "HOUSEID",
+                                "veh_avail")
+
+veh_dfidx_test_original <- fn_make_dfidx(hh_data_test_original,
+                                "HOUSEID",
+                                "veh_avail")
 
 veh_dfidx_train <- fn_make_dfidx(hh_data_train,
                                 "HOUSEID",
@@ -389,6 +488,17 @@ veh_dfidx_test <- fn_make_dfidx(hh_data_test,
 Now we can estimate our multinomial logistic regression using the `mlogit` function.
 
 ```{r}
+model_veh_original <- mlogit(choice ~ 0 | 
+                      WRKCOUNT +
+                      n_child +
+                      n_seniors +
+                      n_extra_drivers +
+                      three_drivers + 
+                      non_work_driver +
+                      income +
+                      density | 0,
+                           veh_dfidx_train_original,
+                           reflevel = "Suff.")
 
 model_veh <- mlogit(choice ~ 0 | 
                       WRKCOUNT +
@@ -398,13 +508,19 @@ model_veh <- mlogit(choice ~ 0 |
                       three_drivers + 
                       non_work_driver +
                       income +
+                      homeowner +
+                      urban_rural +
+                      educ_level +  
                       density | 0,
                            veh_dfidx_train,
                            reflevel = "Suff.")
-
 ```
 
 And now we can take a look at the results of our model.
+
+```{r}
+summary(model_veh_original)
+```
 
 ```{r}
 summary(model_veh)
@@ -465,6 +581,14 @@ $$
 We can do this calculation for all the households in our test dataset using the `predict()` function.
 
 ```{r, message=FALSE}
+
+predicts_test_original <- predict(model_veh_original, veh_dfidx_test_original) |>
+  as.data.frame() |>
+  rownames_to_column("HOUSEID") |>
+  mutate(HOUSEID = as.numeric(HOUSEID)) |>
+  left_join(hh_data_test)
+
+
 predicts_test <- predict(model_veh, veh_dfidx_test) |>
   as.data.frame() |>
   rownames_to_column("HOUSEID") |>
@@ -484,6 +608,13 @@ head(predicts_test) |>
 Now we can check how accurate and reliable our model is on the test dataset. First, I'll designate the alternative with the highest predicted probability as the "most likely" choice.
 
 ```{r}
+predicts_test_original <- predicts_test_original |>
+  mutate(most_likely = case_when((Suff. > Insuff.) & (Suff. > Zero) ~ "Suff.",
+                                 (Zero > Insuff.) & (Zero > Suff.) ~ "Zero",
+                                 TRUE ~ "Insuff.")) 
+```
+
+```{r}
 predicts_test <- predicts_test |>
   mutate(most_likely = case_when((Suff. > Insuff.) & (Suff. > Zero) ~ "Suff.",
                                  (Zero > Insuff.) & (Zero > Suff.) ~ "Zero",
@@ -493,6 +624,15 @@ predicts_test <- predicts_test |>
 Now, I need to convert the `most_likely` and `veh_avail` variables from strings to factors in order for the next part to work.
 
 ```{r}
+predicts_test_original <- predicts_test_original |>
+  mutate(most_likely = factor(most_likely, 
+                              levels = c("Suff.", "Insuff.", "Zero"))) |>
+  mutate(veh_avail = factor(veh_avail,
+                            levels = c("Suff.", "Insuff.", "Zero"))) |>
+  mutate(correct = veh_avail == most_likely)
+
+
+
 predicts_test <- predicts_test |>
   mutate(most_likely = factor(most_likely, 
                               levels = c("Suff.", "Insuff.", "Zero"))) |>
@@ -504,6 +644,11 @@ predicts_test <- predicts_test |>
 ```
 
 And now, I can use the `confusionMatrix` function to generate some accuracy and reliability statistics.
+
+```{r}
+confusionMatrix(data = predicts_test_original$most_likely,
+                reference = predicts_test_original$veh_avail)
+```
 
 ```{r}
 confusionMatrix(data = predicts_test$most_likely,
