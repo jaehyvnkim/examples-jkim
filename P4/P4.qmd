@@ -47,11 +47,14 @@ all_cbsas <- core_based_statistical_areas(progress_bar = FALSE,
   mutate(type = ifelse(!is.na(str_match(NAMELSAD, "Metro")), "Metro", "Micro")) |>
   mutate(type = as.character(type))
 
-table(all_cbsas$type) |>
-  kable()
+all_cbsas
 ```
 
-I'm going to work on the Traverse City, Michigan MSA, which includes the following counties:
+```{r}
+View(all_cbsas)
+```
+
+![]()I'm going to work on the Napa, Michigan MSA, which includes the following counties:
 
 -   Benzie (FIPS = 019)
 
@@ -62,16 +65,16 @@ I'm going to work on the Traverse City, Michigan MSA, which includes the followi
 -   Leelanau (FIPS = 089)
 
 ```{r traverse-boundary}
-traverse <- all_cbsas |>
-  filter(NAMELSAD == "Traverse City, MI Metro Area") |>
+napa <- all_cbsas |>
+  filter(NAMELSAD == "Napa, CA Metro Area") |>
   st_transform("WGS84")
 
-base_map <- get_tiles(traverse,
+base_map <- get_tiles(napa,
                       provider = "CartoDB.Positron",
                       zoom = 9,
                       crop = TRUE)
 
-ggplot(traverse) +
+ggplot(napa) +
   geom_spatraster_rgb(data = base_map) +
   geom_sf(fill = NA,
           color = "orange") +
@@ -87,11 +90,11 @@ You can download data on all workers who live and work in a particular state and
 Since county IDs are contained within block IDs, you can create a variable indicating which county each block is in and filter the data to include only those workers who live and work within the study area.
 
 ```{r read-jobs, message=FALSE}
-state <- "mi"
+state <- "ca"
 year <- "2021"
 
-traverse_counties_5_digit <- c("26019", "26055", "26079", "26089")
-traverse_counties_3_digit <- substr(traverse_counties_5_digit, 4, 5)
+napa_counties_5_digit <- c("06055")
+napa_counties_3_digit <- substr(napa_counties_5_digit, 3, 5)
 
 url <- paste0("https://lehd.ces.census.gov/data/lodes/LODES8/",
               state,
@@ -104,8 +107,8 @@ url <- paste0("https://lehd.ces.census.gov/data/lodes/LODES8/",
 pa_data <- read_csv(url) |>
   mutate(w_county = substr(w_geocode, 1, 5),
          h_county = substr(h_geocode, 1, 5)) |>
-  filter(h_county %in% traverse_counties_5_digit &
-           w_county %in% traverse_counties_5_digit) |>
+  filter(h_county %in% napa_counties_5_digit &
+           w_county %in% napa_counties_5_digit) |>
   mutate(w_geocode = as.character(w_geocode),
          h_geocode = as.character(h_geocode))
   
@@ -197,8 +200,8 @@ First, let's download the census block boundaries within these four counties.
 
 ```{r load-blocks, message=FALSE}
 
-msa_blocks <- blocks(state = "MI",
-                     county = traverse_counties_3_digit,
+msa_blocks <- blocks(state = "ca",
+                     county = napa_counties_3_digit,
                      progress_bar = FALSE)
 
 ggplot(msa_blocks) +
@@ -209,7 +212,17 @@ ggplot(msa_blocks) +
   
 ```
 
-There are 6100 census blocks in the the Traverse City metropolitan area. We only have trip generation data for 4079 census blocks, so we know that many of those don't have any jobs or workers in them (for instance, some of them are mostly water).
+```{r}
+nrow(msa_blocks)
+
+```
+
+```{r}
+sum(trip_gen$total_p > 0)
+
+```
+
+There are 2031 census blocks in the the Napa metropolitan area. We only have trip generation data for 1547 census blocks, so we know that many of those don't have any jobs or workers in them (for instance, some of them are mostly water).
 
 We'll join the trip generation table to these blocks, and filter them to only include those that are included in the trip generation table (i.e. we'll do a right join).
 
@@ -228,7 +241,7 @@ trip_gen_locs <- msa_blocks |>
          total_a) |>
   st_transform("WGS84")
 
-leaflet(trip_gen_locs) |>
+map <- leaflet(trip_gen_locs) |>
   addProviderTiles(provider = "CartoDB.Positron") |>
   addPolygons(weight = 2,
               color = "orange",
@@ -241,19 +254,50 @@ leaflet(trip_gen_locs) |>
 
 If you look closely (and zoom in) you can see that there is a little island in the West Grand Traverse Bay that could cause a problem for us, since we're going to be calculating travel times between each block along the street network, and this island is not connected to the rest of the region by streets. This is block 260555509002022. Let's take a closer look.
 
-```{r inspect-island}
-trip_gen |>
-  filter(geocode == "260555509002022") |>
-  t() |>
-  kable()
+```{r, inspect-island}
+trip_gen %>%
+  filter(geocode %in% c("060552014031015", "060552018001042", "060552007032003")) %>%
+  t() 
+```
+
+```{r}
+trip_gen_locs_filter <- msa_blocks %>%
+  rename(geocode = GEOID20) %>%
+  right_join(trip_gen %>% 
+               filter(geocode %in% c("060552014031015", "060552018001042", "060552007032003")), 
+             by = "geocode") %>%
+  select(geocode, 
+         goods_p, 
+         trade_p, 
+         serve_p,
+         total_p,
+         goods_a, 
+         trade_a,
+         serve_a,
+         total_a) %>%
+  st_transform("WGS84")
+
+map2 <- leaflet(trip_gen_locs_filter) %>%
+  addProviderTiles(provider = "CartoDB.Positron") %>%
+  addPolygons(weight = 2,
+              color = "orange",
+              fillColor = "orange",
+              fillOpacity = 0.1,
+              highlightOptions = highlightOptions(weight = 3, fillOpacity = 0.5),
+              label = ~geocode)
+```
+
+```{r}
+map2
 ```
 
 It looks like three service workers live on this island and there are no jobs there. For simplicity, the easiest thing to do will be to delete these three workers from our dataset. We need to delete both their homes and their jobs. So we'll delete all the rows from the production-attraction matrix with a home in that block, and then we'll recreate the trip generation table and the layer with the locations of the productions and attractions.
 
-```{r delete-island, message=FALSE}
+```{r, delete-island, message=FALSE}
 
 pa_data <- pa_data |>
-  filter(h_geocode != "260555509002022")
+  filter(!h_geocode %in% c("060552014031015", "060552018001042", "060552007032003") &
+         !w_geocode %in% c("060552014031015", "060552018001042", "060552007032003"))
 
 total_prod <- pa_data |>
   group_by(h_geocode) |>
@@ -305,6 +349,17 @@ leaflet(trip_gen_locs) |>
               highlightOptions = highlightOptions(weight = 3,
                                                   fillOpacity = 0.5),
               label = trip_gen_locs$geocode)
+
+
+```
+
+```{r}
+ggplot() +
+  geom_spatraster_rgb(data = base_map) +   # add your base map raster layer
+  geom_sf(data = trip_gen_locs,            # add your spatial polygons
+          fill = NA, 
+          color = "orange") +
+  theme_void()
 ```
 
 ## Load the network
@@ -325,36 +380,28 @@ Now let's load the street network. We'll use the OpenStreetMap network, which we
 
 -   Download the pbf file and save it to the folder you created.
 
-```{r bbbike-gif}
-
-here("P4",
-     "gifs",
-     "bbbike-extract.gif") |>
-  knitr::include_graphics()
-```
-
 The r5r package uses the pbf file directly, but if you want to take a look at what's in it, you can export it to two spatial data layers: one for points (these are mostly intersections), and one for lines (these are mostly street segments). Here's how you might save those as shapefiles.
 
 ```{r, eval=FALSE}
 
-traverse_core <- here("P4",
-     "traverse-network") |>
+napa_core <- here("P4",
+     "napa-network") |>
   setup_r5()
 
-street_vis <- street_network_to_sf(traverse_core)
+street_vis <- street_network_to_sf(napa_core)
 
 street_lines <- street_vis$edges
 street_pts <- street_vis$vertices
 
-st_write(street_lines,
-         here("P4",
-              "data",
-              "street-lines.shp"))
+#st_write(street_lines,
+#         here("P4",
+#              "data",
+#              "street-lines.shp"))
 
-st_write(street_pts,
-         here("P4",
-              "data",
-              "street-pts.shp"))
+#st_write(street_pts,
+#         here("P4",
+#              "data",
+#              "street-pts.shp"))
 
 stop_r5()
 ```
@@ -387,12 +434,14 @@ base_map <- get_tiles(street_lines,
 
 ```
 
-```{r fake-plot-streets, echo=FALSE}
+```{r echo=FALSE}
 
-here("P4",
-     "gifs",
-     "plot-streets.png") |>
-  knitr::include_graphics()
+ggplot(msa_blocks) +
+  geom_spatraster_rgb(data = base_map) +
+  geom_sf(fill = NA,
+          color = "orange") +
+  theme_void()
+
 ```
 
 And I can see that my street network does cover the full area of the trip generation zones (and a good bit beyond that).
@@ -419,34 +468,37 @@ trip_gen_pts <- street_pts[trip_gen_loc_ids,] |>
   select(id)
 ```
 
+```{r}
+nrow(trip_gen_pts)
+```
+
 Now we can calculate our travel time matrix.
 
 Note that calculating the travel time matrix (also called skimming the network) can take a little while - mostly depending on how many blocks you have in your study area. In this example, I have 4078 blocks, and it takes about half an hour. If you choose a smaller CBSA with fewer census blocks, it won't take as long. If you choose a large CBSA like Los Angeles, New York, or Chicago, it could take multiple days.
 
 Also note that r5r will generate a lot (a *lot*) or error and warning messages that you safely ignore.
 
-```{r, eval=FALSE}
+``` {eval="FALSE"}
 
-traverse_core <- here("P4",
-     "traverse-network") |>
+napa_core <- here("P4",
+     "napa-network") |>
   setup_r5()
 
-skim <- travel_time_matrix(traverse_core,
+skim <- travel_time_matrix(napa_core,
                            origins = trip_gen_pts,
                            destinations = trip_gen_pts,
                            mode = "CAR",
-                           max_trip_duration = 180)
+                           max_trip_duration = 1600)
 
 stop_r5()
-
 ```
 
 The skim takes a long time to generate, so let's save it to the file to keep from having to re-do it every time we test our code.
 
-```{r, eval=FALSE}
+``` {eval="FALSE"}
 write_csv(skim, file = here("P4",
                             "data",
-                            "traverse-skim.csv"))
+                            "napa-skim.csv"))
 ```
 
 And now we can just work from the saved version. `col_types = "ccn"` is how I specify that the data I'm reading in has three columns: two character columns ("c" and "c"), followed by a numeric column ("n").
@@ -454,7 +506,7 @@ And now we can just work from the saved version. `col_types = "ccn"` is how I sp
 ```{r read-skim}
 skim <- read_csv(here("P4",
                       "data",
-                      "traverse-skim.csv"),
+                      "napa-skim.csv"),
                  col_types = "ccn")
 ```
 
@@ -462,15 +514,25 @@ Let's take a look at the first few rows of our skim data frame.
 
 ```{r view-skim}
 
-head(skim) |>   
-  kable()
+head(skim)
 ```
 
 The data set has three columns to indicate the estimated travel time between every possible pair of blocks. Since the study area includes 4078 blocks, the total number of production-attraction pairs should be $4078^2$, which is 16,630,084 pairs.
 
 ```{r count-skim}
 
+nrow(trip_gen_pts)
+nrow(skim)^(1/2)
+
+nrow(trip_gen_pts)^2
 nrow(skim)
+```
+
+```{r}
+unique_skim <- unique(c(skim$from_id, skim$to_id))
+diff_in_trip <- setdiff(trip_gen$geocode, unique_skim)
+
+diff_in_trip
 ```
 
 And that's exactly what we have. If you have fewer rows in your skim than the square of the number of zones, that means that there were some pairs for which the `r5r` package couldn't find a path through the network. There are three likely reasons for this:
@@ -545,6 +607,8 @@ avg_tts <- tibble(`Worker sector` = c("Goods", "Trade", "Service", "Total"),
                       sum(flow_tt$flow_total)))
                   
 kable(avg_tts, digits = 1)
+
+View(pa_data)
 ```
 
 On average, workers in goods-producing industries live 23 minutes from their work places, workers in trade and retail industries live 20 minutes from their work places and workers in service industries live 21 minutes from their work places. Among all workers, the average travel time from home to work is about 21 minutes.
@@ -702,7 +766,7 @@ The `grvty_balancing` function returns two data frames. The first (convergence) 
 
 Those took a long time to run, so I'm going to save the flow tables to file to avoid having to keep rerunning it.
 
-```{r write-init-flows, eval=FALSE}
+```{r, write-init-flows, eval=FALSE}
 
 write_csv(flow_goods_est$flows,
           file = here("P4",
@@ -732,6 +796,12 @@ How close did the estimated P-A flows come to the observed flows?
 ### Average travel time
 
 We can start by comparing the average estimated travel time to the average observed travel time.
+
+```{r}
+na_counts <- colSums(is.na(flow_tt))
+na_counts
+
+```
 
 ```{r calc-est-tt-init, message=FALSE}
 flow_goods <- here("P4",
@@ -821,7 +891,7 @@ plot_flows <- function(flow_df,
     group_by(obs, est) |>
     summarize(n = n()) 
   
-  max_scale <- max(summary$obs, summary$est)
+  max_scale <- max(summary$obs, summary$est, na.rm = TRUE)
   my_interval <- ceiling(max_scale / 10)
   dot_size <- floor(70 / max_scale)
   
@@ -855,11 +925,14 @@ plot_flows <- function(flow_df,
 
 Here's the comparison for the goods sector:
 
+```{r}
+summary(flow_tt)
+```
+
 ```{r plot-goods-init, message=FALSE}
 plot_flows(flow_tt, 
            obs_col_name = "flow_goods",
            est_col_name = "goods_flow_est")
-
 
 ```
 
@@ -1026,6 +1099,10 @@ write_csv(betas_table,
                "data",
                "calib-betas.csv"))
 
+```
+
+```{r replace NA to 0 in total_flow_est, message=FALSE}
+flow_tt$total_flow_est[is.na(flow_tt$total_flow_est)] <- 0
 ```
 
 ## Evaluate model fit
