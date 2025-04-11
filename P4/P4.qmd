@@ -93,8 +93,13 @@ Since county IDs are contained within block IDs, you can create a variable indic
 state <- "ca"
 year <- "2021"
 
+<<<<<<< HEAD
 napa_counties_5_digit <- c("06055")
 napa_counties_3_digit <- substr(napa_counties_5_digit, 3, 5)
+=======
+traverse_counties_5_digit <- c("26019", "26055", "26079", "26089")
+traverse_counties_3_digit <- substr(traverse_counties_5_digit, 3, 5)
+>>>>>>> cc84949a6c78799fa800cb1bccefffdb81dadbf7
 
 url <- paste0("https://lehd.ces.census.gov/data/lodes/LODES8/",
               state,
@@ -380,6 +385,17 @@ Now let's load the street network. We'll use the OpenStreetMap network, which we
 
 -   Download the pbf file and save it to the folder you created.
 
+<<<<<<< HEAD
+=======
+```{r bbbike-gif, echo=FALSE}
+
+here("P4",
+     "gifs",
+     "bbbike-extract.gif") |>
+  knitr::include_graphics()
+```
+
+>>>>>>> cc84949a6c78799fa800cb1bccefffdb81dadbf7
 The r5r package uses the pbf file directly, but if you want to take a look at what's in it, you can export it to two spatial data layers: one for points (these are mostly intersections), and one for lines (these are mostly street segments). Here's how you might save those as shapefiles.
 
 ```{r, eval=FALSE}
@@ -431,6 +447,14 @@ base_map <- get_tiles(street_lines,
                       zoom = 8,
                       crop = TRUE)
 
+ggplot() +
+  geom_spatraster_rgb(data = base_map) +
+  geom_sf(data = trip_gen_locs,
+          color = "palegreen3",
+          fill = "palegreen") +
+  geom_sf(data = street_lines,
+          color =  "salmon") +
+  theme_void()
 
 ```
 
@@ -990,7 +1014,8 @@ Since these functions take a long time to run, we'll write the results to file.
 flow_tt <- flow_tt |>
   select(-goods_flow_est,
          -trade_flow_est,
-         -serve_flow_est)
+         -serve_flow_est,
+         -total_flow_est)
 
 ## Calibrate goods beta
 calibrated_flows_goods <- grvty_calibrate(obs_flow_tt = flow_tt,
